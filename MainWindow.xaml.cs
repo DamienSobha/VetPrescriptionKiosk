@@ -9,7 +9,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace VetPrescriptionKiosk_sourceCode
+namespace VetPrescriptionKiosk
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

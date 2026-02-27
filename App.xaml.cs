@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace VetPrescriptionKiosk_sourceCode
+namespace VetPrescriptionKiosk
 {
     /// <summary>
     /// Interaction logic for App.xaml
