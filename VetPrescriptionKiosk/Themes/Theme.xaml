@@ -1,0 +1,71 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ========= BASE COLORS ========= -->
+
+    <!-- Background -->
+    <Color x:Key="BackgroundColor">#F2F3F5</Color>
+
+    <!-- Card / Surface -->
+    <Color x:Key="SurfaceColor">#FFFFFF</Color>
+
+    <!-- Primary Button (Dark Grey) -->
+    <Color x:Key="PrimaryColor">#3A3F44</Color>
+
+    <!-- Accent (Soft Grey Blue for success) -->
+    <Color x:Key="AccentColor">#5C6B73</Color>
+
+    <!-- Text -->
+    <Color x:Key="PrimaryTextColor">#222222</Color>
+    <Color x:Key="SecondaryTextColor">#6C757D</Color>
+
+    <!-- ========= BRUSHES ========= -->
+
+    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+    <SolidColorBrush x:Key="PrimaryTextBrush" Color="{StaticResource PrimaryTextColor}"/>
+    <SolidColorBrush x:Key="SecondaryTextBrush" Color="{StaticResource SecondaryTextColor}"/>
+
+    <!-- ========= GLOBAL GRID BACKGROUND ========= -->
+
+    <Style TargetType="Grid">
+        <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
+    </Style>
+
+    <!-- ========= TEXT STYLES ========= -->
+
+    <Style TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}"/>
+        <Setter Property="FontFamily" Value="Segoe UI"/>
+    </Style>
+
+    <!-- ========= BUTTON STYLE ========= -->
+
+    <Style TargetType="Button">
+        <Setter Property="Height" Value="50"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="Margin" Value="0,10,0,0"/>
+        <Setter Property="Padding" Value="10"/>
+        <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+
+        <!-- Hover Effect -->
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                            CornerRadius="8">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

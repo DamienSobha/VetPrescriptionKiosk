@@ -1,75 +1,84 @@
 ﻿<Window x:Class="VetPrescriptionKiosk.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:helpers="clr-namespace:VetPrescriptionKiosk.Helpers"
+        xmlns:views="clr-namespace:VetPrescriptionKiosk.Views"
+        xmlns:vm="clr-namespace:VetPrescriptionKiosk.ViewModels"
         Title="Vet Prescription Kiosk"
-        Height="800"
+        Height="600"
         Width="400"
-        WindowStartupLocation="CenterScreen">
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        Background="#F4F6F9">
 
     <Window.Resources>
-        <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+        <!-- Home Screen -->
+        <DataTemplate x:Key="HomeTemplate">
+            <views:HomeView/>
+        </DataTemplate>
+
+        <!-- Details Screen -->
+        <DataTemplate x:Key="DetailsTemplate">
+            <views:DetailsView/>
+        </DataTemplate>
+
+        <!-- Output Screen -->
+        <DataTemplate x:Key="OutputTemplate">
+            <views:OutputView/>
+        </DataTemplate>
+
+        <!-- Payment Screen -->
+        <DataTemplate x:Key="PaymentTemplate">
+            <views:PaymentSuccessView/>
+        </DataTemplate>
+
     </Window.Resources>
 
-    <Grid Margin="20">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="30"/>
+            <!-- Drag Area -->
             <RowDefinition Height="*"/>
+            <!-- App Content -->
         </Grid.RowDefinitions>
 
-        <!-- INPUT SECTION -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <!-- Condition -->
-            <TextBlock Text="Condition" FontWeight="Bold"/>
-            <ComboBox ItemsSource="{Binding DogConditions}"
-                  SelectedItem="{Binding SelectedCondition}"
-                  Margin="0,5,0,10"/>
+        <!-- Invisible Drag Bar -->
+        <Border Grid.Row="0"
+            Background="Transparent"
+            MouseLeftButtonDown="Window_MouseLeftButtonDown"/>
 
-            <!-- Weight -->
-            <StackPanel Visibility="{Binding IsWeightRequired, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <TextBlock Text="Dog Weight (kg)" FontWeight="Bold"/>
-                <TextBox Text="{Binding Weight, UpdateSourceTrigger=PropertyChanged}"
-                     Margin="0,5,0,10"/>
-            </StackPanel>
+        <!-- Main Content -->
+        <ContentControl Grid.Row="1"
+                    Content="{Binding}">
+            <ContentControl.Style>
+                <Style TargetType="ContentControl">
 
-            <!-- Age -->
-            <StackPanel Visibility="{Binding IsPuppy, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <TextBlock Text="Age (weeks)" FontWeight="Bold"/>
-                <TextBox Text="{Binding AgeWeeks, UpdateSourceTrigger=PropertyChanged}"
-                     Margin="0,5,0,10"/>
-            </StackPanel>
+                    <Setter Property="ContentTemplate"
+                        Value="{StaticResource HomeTemplate}"/>
 
-            <Button Content="Submit"
-                Command="{Binding CalculateCommand}"
-                Height="45"
-                Margin="0,10,0,0"/>
-        </StackPanel>
+                    <Style.Triggers>
 
-        <!-- RECEIPT SECTION -->
-        <StackPanel Grid.Row="1">
-            <TextBlock Text="{Binding Result.TotalCost, StringFormat='Total: £{0:F2}'}"
-                   FontSize="18"
-                   FontWeight="Bold"
-                   Margin="0,0,0,10"
-                   Visibility="{Binding Result, Converter={StaticResource NullToVisibilityConverter}}"/>
+                        <DataTrigger Binding="{Binding CurrentScreen}" Value="Details">
+                            <Setter Property="ContentTemplate"
+                                Value="{StaticResource DetailsTemplate}"/>
+                        </DataTrigger>
 
-            <ListView ItemsSource="{Binding Result.Lines}"
-                  Visibility="{Binding Result, Converter={StaticResource NullToVisibilityConverter}}">
-                <ListView.View>
-                    <GridView>
-                        <GridViewColumn Header="Item"
-                                    DisplayMemberBinding="{Binding Description}" Width="150"/>
-                        <GridViewColumn Header="Qty"
-                                    DisplayMemberBinding="{Binding Quantity}" Width="25"/>
-                        <GridViewColumn Header="Unit"
-                                    DisplayMemberBinding="{Binding UnitPrice, StringFormat=£{0:F2}}" Width="70"/>
-                        <GridViewColumn Header="Total"
-                                    DisplayMemberBinding="{Binding LineTotal, StringFormat=£{0:F2}}" Width="70"/>
-                    </GridView>
-                </ListView.View>
-            </ListView>
-        </StackPanel>
+                        <DataTrigger Binding="{Binding CurrentScreen}" Value="Output">
+                            <Setter Property="ContentTemplate"
+                                Value="{StaticResource OutputTemplate}"/>
+                        </DataTrigger>
+
+                        <DataTrigger Binding="{Binding CurrentScreen}" Value="PaymentSuccess">
+                            <Setter Property="ContentTemplate"
+                                Value="{StaticResource PaymentTemplate}"/>
+                        </DataTrigger>
+
+                    </Style.Triggers>
+
+                </Style>
+            </ContentControl.Style>
+        </ContentControl>
     </Grid>
 
 </Window>

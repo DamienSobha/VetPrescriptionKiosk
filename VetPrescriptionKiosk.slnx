@@ -1,4 +1,8 @@
 <Solution>
-  <Project Path="VetPrescriptionKiosk.Tests/VetPrescriptionKiosk.Tests.csproj" Id="c086fb91-805b-4d8b-a902-e7b63b0f412a" />
-  <Project Path="VetPrescriptionKiosk/VetPrescriptionKiosk.csproj" />
+  <Project Path="VetPrescriptionKiosk.Tests/VetPrescriptionKiosk.Tests.csproj" Id="c086fb91-805b-4d8b-a902-e7b63b0f412a">
+    <BuildType Project="Debug" />
+  </Project>
+  <Project Path="VetPrescriptionKiosk/VetPrescriptionKiosk.csproj">
+    <BuildType Project="Release" />
+  </Project>
 </Solution>

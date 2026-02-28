@@ -7,4 +7,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Views\Assets\vetImg.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Views\Assets\vetImg.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

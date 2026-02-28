@@ -1,11 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using VetPrescriptionKiosk.Models;
 using VetPrescriptionKiosk.Services;
 using VetPrescriptionKiosk.Helpers;
-using System.Collections.Generic;
 
 namespace VetPrescriptionKiosk.ViewModels
 {
@@ -15,18 +15,50 @@ namespace VetPrescriptionKiosk.ViewModels
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public bool IsWeightRequired
+        public MainViewModel()
         {
-            get
-            {
-                if (SelectedCondition == DogCondition.Puppy)
-                    return AgeWeeks >= 12; // only require weight if puppy is 12+ weeks
+            _calculator = new PrescriptionCalculator();
 
-                return true; // Normal + Nursing always require weight
+            StartCommand = new RelayCommand(_ => GoToDetails());
+            SubmitCommand = new RelayCommand(_ => Submit());
+            PayCommand = new RelayCommand(_ => CompletePayment(), _ => Result != null);
+            CancelCommand = new RelayCommand(_ => ReturnHome());
+            PrintReceiptCommand = new RelayCommand(_ => PrintReceipt(), _ => Result != null);
+        }
+
+        // -------------------------
+        // Navigation State
+        // -------------------------
+
+        private ScreenState _currentScreen = ScreenState.Home;
+        public ScreenState CurrentScreen
+        {
+            get => _currentScreen;
+            set
+            {
+                _currentScreen = value;
+                OnPropertyChanged();
             }
         }
 
+        // -------------------------
+        // Dog Inputs
+        // -------------------------
+
         public IEnumerable<DogCondition> DogConditions { get; } = Enum.GetValues<DogCondition>();
+
+        private DogCondition _selectedCondition;
+        public DogCondition SelectedCondition
+        {
+            get => _selectedCondition;
+            set
+            {
+                _selectedCondition = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsPuppy));
+                OnPropertyChanged(nameof(IsWeightRequired));
+            }
+        }
 
         private float _weight;
         public float Weight
@@ -48,37 +80,19 @@ namespace VetPrescriptionKiosk.ViewModels
                 _ageWeeks = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(IsWeightRequired));
+
                 if (SelectedCondition == DogCondition.Puppy && AgeWeeks < 12)
-                {
                     Weight = 0;
-                }
             }
         }
-
-        private DogCondition _selectedCondition;
-        public DogCondition SelectedCondition
-        {
-            get => _selectedCondition;
-            set
-            {
-                _selectedCondition = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(IsPuppy));
-                OnPropertyChanged(nameof(IsWeightRequired));
-            }
-        }
-
-        public enum ScreenState { Home, Details, Receipt, PaymentSuccess }
-
-        public ScreenState CurrentScreen { get; set; } = ScreenState.Home;
-
-        public ICommand StartCommand { get; }
-        public ICommand SubmitCommand { get; }
-        public ICommand PayCommand { get; }
-        public ICommand CancelCommand { get; }
-        public ICommand PrintReceiptCommand { get; }
 
         public bool IsPuppy => SelectedCondition == DogCondition.Puppy;
+
+        public bool IsWeightRequired => SelectedCondition == DogCondition.Puppy ? AgeWeeks >= 12 : true;
+
+        // -------------------------
+        // Result State
+        // -------------------------
 
         private Prescription? _result;
         public Prescription? Result
@@ -102,15 +116,27 @@ namespace VetPrescriptionKiosk.ViewModels
             }
         }
 
-        public ICommand CalculateCommand { get; }
+        // -------------------------
+        // Commands
+        // -------------------------
 
-        public MainViewModel()
+        public ICommand StartCommand { get; }
+        public ICommand SubmitCommand { get; }
+        public ICommand PayCommand { get; }
+        public ICommand CancelCommand { get; }
+        public ICommand PrintReceiptCommand { get; }
+
+        // -------------------------
+        // Navigation Methods
+        // -------------------------
+
+        private void GoToDetails()
         {
-            _calculator = new PrescriptionCalculator();
-            CalculateCommand = new RelayCommand(_ => Calculate());
+            ResetState();
+            CurrentScreen = ScreenState.Details;
         }
 
-        private void Calculate()
+        private void Submit()
         {
             try
             {
@@ -122,11 +148,58 @@ namespace VetPrescriptionKiosk.ViewModels
                 Result = null;
                 ErrorMessage = ex.Message;
             }
+
+            // Always navigate to Output screen after submit
+            CurrentScreen = ScreenState.Output;
         }
 
-        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        private void CompletePayment()
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            CurrentScreen = ScreenState.PaymentSuccess;
+        }
+
+        private void ReturnHome()
+        {
+            ResetState();
+            CurrentScreen = ScreenState.Home;
+        }
+
+        private void ResetState()
+        {
+            Weight = 0;
+            AgeWeeks = 0;
+            SelectedCondition = default;
+            Result = null;
+            ErrorMessage = null;
+        }
+
+        // -------------------------
+        // Receipt Simulation
+        // -------------------------
+
+        private void PrintReceipt()
+        {
+            if (Result == null) return;
+
+            var receiptText = $"Order ID: {Result.TransactionId}\n\n";
+
+            foreach (var line in Result.Lines)
+                receiptText += $"{line.Description} x{line.Quantity} - £{line.LineTotal:F2}\n";
+
+            receiptText += $"\nTotal: £{Result.TotalCost:F2}";
+
+            var path = $"Receipt_{Result.TransactionId}.txt";
+
+            System.IO.File.WriteAllText(path, receiptText);
+        }
+
+        // -------------------------
+        // Notify
+        // -------------------------
+
+        private void OnPropertyChanged([CallerMemberName] string? name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
     }
 }
