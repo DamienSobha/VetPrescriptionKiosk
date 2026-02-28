@@ -1,6 +1,5 @@
 using System;
 using VetPrescriptionKiosk.Models;
-using VetPrescriptionKiosk.Helpers;
 
 namespace VetPrescriptionKiosk.Services
 {
@@ -8,6 +7,13 @@ namespace VetPrescriptionKiosk.Services
     {
         public Prescription Calculate(float weightKg, int ageWeeks, DogCondition condition)
         {
+            // Puppy under 12 weeks: weight not required
+            if (condition == DogCondition.Puppy && ageWeeks < 12)
+            {
+                return CalculatePuppy(new Prescription());
+            }
+
+            // For everything else, weight is required
             if (weightKg <= 0)
                 throw new ArgumentException("Weight must be greater than zero.");
 
@@ -19,7 +25,7 @@ namespace VetPrescriptionKiosk.Services
             switch (condition)
             {
                 case DogCondition.Puppy:
-                    return CalculatePuppy(prescription);
+                    return CalculateNormal(weightKg, prescription);
 
                 case DogCondition.Nursing:
                     return CalculateNursing(weightKg, prescription);
@@ -33,22 +39,12 @@ namespace VetPrescriptionKiosk.Services
         private Prescription CalculateNormal(float weightKg, Prescription prescription)
         {
             prescription.WormerTablets = GetNormalTabletAmount(weightKg);
-
-            prescription.TotalCost =
-                (prescription.WormerTablets * Constants.WormerTabletPrice)
-                + Constants.PrescriptionFee;
-
             return prescription;
         }
 
         private Prescription CalculatePuppy(Prescription prescription)
         {
             prescription.JuniorTablets = 1;
-
-            prescription.TotalCost =
-                (Constants.JuniorTabletPrice)
-                + Constants.PrescriptionFee;
-
             return prescription;
         }
 
@@ -58,11 +54,6 @@ namespace VetPrescriptionKiosk.Services
 
             prescription.NursingTablets = tablets;
             prescription.TapewormDrops = 1;
-
-            prescription.TotalCost =
-                (tablets * Constants.NursingTabletPrice)
-                + Constants.TapewormDropPrice
-                + Constants.PrescriptionFee;
 
             return prescription;
         }
@@ -74,9 +65,9 @@ namespace VetPrescriptionKiosk.Services
             if (weightKg < 25) return 3;
             if (weightKg < 30) return 4;
             if (weightKg < 35) return 5;
-            if (weightKg < 40) return 6;
+            if (weightKg <= 40) return 6;
 
-            throw new InvalidOperationException("Invalid weight range.");
+            throw new InvalidOperationException("Dog may be overweight. Please visit surgery for a check-up.");
         }
     }
 }
